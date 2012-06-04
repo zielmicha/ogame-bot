@@ -153,7 +153,9 @@ def main():
 
 if __name__ == '__main__':
     app = Qt.QApplication([])
-
+    app.setApplicationName("Chrome")
+    app.setApplicationVersion("18.0.1025.151")
+    
     main()
     
     app.exec_()

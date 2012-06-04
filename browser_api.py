@@ -7,15 +7,21 @@ from time import sleep, time
 import random
 from random import randrange
 
-sock = socket.socket(socket.AF_UNIX)
-sock.connect('browser.sock')
-sock_file = sock.makefile('r+', 1)
-
 pattern_cache = {}
 render_cache = None
 render_cache_last = 0
 
+sock = None
+
+def _connect():
+    global sock, sock_file
+    sock = socket.socket(socket.AF_UNIX)
+    sock.connect('browser.sock')
+    sock_file = sock.makefile('r+', 1)
+
 def _call(*args):
+    if not sock:
+        _connect()
     sock_file.write(' '.join(map(str, args)) + '\n')
 
 def call_result(*args):

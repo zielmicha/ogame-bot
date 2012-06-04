@@ -2,6 +2,7 @@ import pygame
 import socket
 import time
 import os
+import sys
 
 sock = socket.socket(socket.AF_UNIX)
 sock.connect('browser.sock')
@@ -40,7 +41,7 @@ while True:
             else:
                 print ev.pos
         elif ev.type == pygame.QUIT:
-            break
+            sys.exit()
 
     path = call_result('render')
 

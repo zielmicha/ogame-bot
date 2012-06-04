@@ -1,3 +1,13 @@
+
+from collections import namedtuple
+
+ResTuple = namedtuple('ResTuple', 'crystal metal deuterium mult')
+
+b_metal_mine = ResTuple(60, 15, 0, 1.5)
+b_crystal_mine = ResTuple(48, 24, 0, 1.6)
+b_deuterium_mine = ResTuple(225, 75, 0, 1.5)
+b_power_plant = ResTuple(75, 30, 0, 1.5)
+
 from browser_api import *
 
 class InfoC:
@@ -9,7 +19,17 @@ class InfoC:
     def __getitem__(self, s):
         return getattr(self, s.replace('-', '_'))
 
+    def items(self):
+        return [ (k, getattr(self, k)) for k in dir(self) if not k.startswith('_') and not hasattr(InfoC, k) ]
+
 Info = InfoC()
+
+_has_logged = False
+def ensure_login():
+    global _has_logged
+    if not _has_logged:
+        api.login()
+        _has_logged = True
 
 def login():
     if not is_on_screen('in-game.png'):
@@ -36,9 +56,12 @@ def login():
         print 'aleardy logged'
 
 def load_info():
+    global Info
     wait_for('in-game.png')
 
     ensure_on_screen('resources')
+
+    Info = InfoC()
     
     print 'get resources'
     Info.resources = InfoC()
@@ -52,16 +75,15 @@ def load_info():
     Info.levels.metal_mine = get_level('#button1 .level')
     Info.levels.crystal_mine = get_level('#button2 .level')
     Info.levels.deuterium_mine = get_level('#button3 .level')
-    Info.levels.solar_plant = get_level('#button4 .level')
+    Info.levels.power_plant = get_level('#button4 .level')
 
     print 'get can build'
     Info.can_build = InfoC()
     Info.can_build.metal_mine = is_on_screen('metal-mine.png')
     Info.can_build.crystal_mine = is_on_screen('crystal-mine.png')
     Info.can_build.deuterium_mine = is_on_screen('deuterium-mine.png')
-    Info.can_build.solar_plant = is_on_screen('power-plant.png')
-    
-    #print Info
+    Info.can_build.power_plant = is_on_screen('power-plant.png')
+
 
 def ensure_on_screen(name):
     if not is_on_screen(name + '-button.png'):
@@ -71,23 +93,13 @@ def ensure_on_screen(name):
 def get_level(selector):
     return int(get_text(selector).split()[-1])
 
-def do_things():
-    # main part of bot - decides what to do
-
-    if Info.resources.energy < 0:
-        build_if_can('power-plant')
+def build_if_can(name, _force=False):
+    if not _force and not Info.can_build[name]:
+        print 'not attempting to build', name
         return
     
-    norm_levels = [Info.levels.metal_mine, Info.levels.crystal_mine + 2, Info.levels.deuterium_mine * 1.5 + 4]
-    to_build = norm_levels.index(min(norm_levels))
-    if to_build == 0:
-        build_if_can('metal-mine')
-    elif to_build == 1:
-        build_if_can('crystal-mine')
-    elif to_build == 2:
-        build_if_can('deuterium-mine')
-
-def build_if_can(name):
+    ensure_login()
+    
     ensure_on_screen('resources')
 
     if is_on_screen('improve.png', confidence = 0.95):
@@ -101,21 +113,8 @@ def build_if_can(name):
         click_on(name + '.png')
         click_on('improve.png', confidence = 0.95)
         print 'ok'
+        return True
     else:
-        print 'cannot'
+        print 'not possible'
+        return False
 
-def maybe_reload():
-    if randrange(25) == 0:
-        javascript('location.reload()')
-        
-def main():
-    login()
-
-    while True:
-        load_info()
-        do_things()
-        random_sleep(130, 150)
-        maybe_reload()
-
-if __name__ == '__main__':
-    main()
