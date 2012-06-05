@@ -46,11 +46,6 @@ def click(x, y):
 def get_text(selector):
     return call_result('get', selector).decode('base64')
 
-def get_int(selector):
-    t = get_text(selector)
-    t = t.replace('.', '')
-    return int(t)
-
 def render(cache=True):
     global render_cache, render_cache_last
     if cache and (time() - render_cache_last) < 1.5:

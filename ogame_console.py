@@ -20,18 +20,27 @@ def fun_do_scenario(name):
 
 def fun_show():
     load_info()
+
+    Info = api.Info
+    
     print '-- buildings --'
     for a, b in Info.levels.items():
-        print a, b
+        print a, b, '+' if Info.can_build[a] else '-'
     print '-- resources --'
     for a, b in Info.resources.items():
         print a, b
     
 def load_info():
-    # this can be done prettier
+    # this could be done prettier
     api.Info = ogame_db.load('cache_info')
     
     if not api.Info:
+        if not ogame_db.load('reload_timeout', timeout=110):
+            api.ensure_login()
+            api.reload_resources()
+            ogame_db.write('reload_timeout', True)
+        
+        api.ensure_login()
         api.load_info()
         ogame_db.write('cache_info', api.Info)
     

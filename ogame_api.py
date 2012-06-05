@@ -1,13 +1,3 @@
-
-from collections import namedtuple
-
-ResTuple = namedtuple('ResTuple', 'crystal metal deuterium mult')
-
-b_metal_mine = ResTuple(60, 15, 0, 1.5)
-b_crystal_mine = ResTuple(48, 24, 0, 1.6)
-b_deuterium_mine = ResTuple(225, 75, 0, 1.5)
-b_power_plant = ResTuple(75, 30, 0, 1.5)
-
 from browser_api import *
 
 class InfoC:
@@ -28,7 +18,7 @@ _has_logged = False
 def ensure_login():
     global _has_logged
     if not _has_logged:
-        api.login()
+        login()
         _has_logged = True
 
 def login():
@@ -84,6 +74,11 @@ def load_info():
     Info.can_build.deuterium_mine = is_on_screen('deuterium-mine.png')
     Info.can_build.power_plant = is_on_screen('power-plant.png')
 
+def reload_resources():
+    if is_on_screen('preview-button-inact.png'):
+        click_on('preview-button-inact.png')
+    
+    click_on('resources-button-inact.png')
 
 def ensure_on_screen(name):
     if not is_on_screen(name + '-button.png'):
@@ -91,7 +86,13 @@ def ensure_on_screen(name):
         wait_for(name + '-button.png')
     
 def get_level(selector):
-    return int(get_text(selector).split()[-1])
+    val = get_text(selector)
+    return int(val.split()[-1])
+
+def get_int(selector):
+    t = get_text(selector)
+    t = t.replace('.', '')
+    return int(t)
 
 def build_if_can(name, _force=False):
     if not _force and not Info.can_build[name]:
