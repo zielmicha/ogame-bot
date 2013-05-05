@@ -1,14 +1,6 @@
 import ogame_api as api
 import ogame_scenarios
-
-from collections import namedtuple
-
-ResTuple = namedtuple('ResTuple', 'crystal metal deuterium mult')
-
-b_metal_mine = ResTuple(60, 15, 0, 1.5)
-b_crystal_mine = ResTuple(48, 24, 0, 1.6)
-b_deuterium_mine = ResTuple(225, 75, 0, 1.5)
-b_power_plant = ResTuple(75, 30, 0, 1.5)
+import ogame_data
 
 def do_things():
     # old bot
@@ -33,13 +25,15 @@ def do_scenario(name):
 
     Info = api.Info
     
-    if Info.resources.energy < 0:
+    def build_power_plant():
         print 'not enough energy - building power plant'
         api.build_if_can('power-plant')
         return False
 
     for name, desired_level in steps:
         if Info.levels[name] < desired_level:
+            if ogame_data.requires_energy(name) and Info.resources.energy < 0:
+                return build_power_plant()
             api.build_if_can(name)
             return False
     

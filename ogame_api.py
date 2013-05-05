@@ -50,7 +50,7 @@ def load_info():
     wait_for('in-game.png')
 
     ensure_on_screen('resources')
-
+    
     Info = InfoC()
     
     print 'get resources'
@@ -79,6 +79,8 @@ def reload_resources():
         click_on('preview-button-inact.png')
     
     click_on('resources-button-inact.png')
+    wait_for('resources-button.png')
+    sleep(0.5)
 
 def ensure_on_screen(name):
     if not is_on_screen(name + '-button.png'):

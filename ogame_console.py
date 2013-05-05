@@ -14,6 +14,10 @@ def fun_reload():
     ogame_db.write('cache_info', None)
     load_info()
 
+def fun_keep():
+    for name in ['cache_info', 'reload_timeout']:
+        ogame_db.write(name, ogame_db.load(name, timeout=10000000000))
+    
 def fun_do_scenario(name):
     load_info()
     ogame_tool.do_scenario(name)
@@ -29,7 +33,7 @@ def fun_show():
     print '-- resources --'
     for a, b in Info.resources.items():
         print a, b
-    
+
 def load_info():
     # this could be done prettier
     api.Info = ogame_db.load('cache_info')
